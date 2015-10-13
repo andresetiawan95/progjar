@@ -1,4 +1,3 @@
-#Andre Setiawan 5113100013
 import sys, socket, select, string
 
 # Create a TCP/IP socket
@@ -27,23 +26,35 @@ while True:
 				sys.exit()
 		else :
 			msg1 = sys.stdin.readline()
-			command = string.split(msg1[:-1])
+			command = msg1.split()
 			length = len(command)
-			if command[0]=="login":
-				if length < 2:
-					print('Anda belum memasukkan username')
-				elif length > 2:
-					print('Input tidak valid')
+			if command[0]=="regist":
+				if length > 1:
+					print >>sys.stderr, 'Perintah yang anda ketikkan salah'
+					print >>sys.stderr, 'Untuk registrasi, cukup ketik perintah: regist'					
 				else:
-					sock.send(msg1)
+					sys.stdout.write('Username : ')
+					username = sys.stdin.readline()
+					sys.stdout.write('Password : ')
+					password = sys.stdin.readline()
+					sock.send("regist "+username+" "+password)			
+			elif command[0]=="login":
+				if length > 1:
+					print >>sys.stderr, 'Untuk login, cukup ketikkan perintah :login'
+				else:
+					sys.stdout.write('Username : ')
+					userlogx = sys.stdin.readline()
+					sys.stdout.write('Password : ')
+					passlogx = sys.stdin.readline()
+					sock.send("login "+userlogx+" "+passlogx)
 			elif command[0]=="list-user":
 				if length > 1:
-					print('Wrong command')
+					print >>sys.stderr, 'Perintah yang anda ketikkan salah'
 				else:
 					sock.send(msg1)
 			elif command[0]=="send-to":
 				if length < 3:
-					print('Wrong command')
+					print >>sys.stderr, 'Perintah yang anda ketikkan salah'
 				else:
 					sock.send(msg1)
 			else:
