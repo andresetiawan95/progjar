@@ -11,7 +11,7 @@ sock.connect(server_address)
 sys.stdout.write('[Anda] ')
 sys.stdout.flush()
 while True:
-	list_socket = [sys.stdin, sock] #menerima daftar koneksi yg dapat dibaca di socket server dan dimasukkan kedalam list_socket
+	list_socket = [sys.stdin, sock] #memasukkan socket dirinya sendiri dan soccket server ke array list_socket
 	
 	read_socket,write_socket,socket_err = select.select(list_socket,[],[])
 	for socks in read_socket:
@@ -47,16 +47,7 @@ while True:
 					sys.stdout.write('Password : ')
 					passlogx = sys.stdin.readline()
 					sock.send("login "+userlogx+" "+passlogx)
-			elif command[0]=="list-user":
-				if length > 1:
-					print >>sys.stderr, 'Perintah yang anda ketikkan salah'
-				else:
-					sock.send(msg1)
-			elif command[0]=="send-to":
-				if length < 3:
-					print >>sys.stderr, 'Perintah yang anda ketikkan salah'
-				else:
-					sock.send(msg1)
+
 			else:
 				sock.send(msg1)
 
