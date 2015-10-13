@@ -1,4 +1,3 @@
-#Andre Setiawan 5113100013
 import sys,select,socket,string
 
 def sendmessage (socks, message):
@@ -9,22 +8,41 @@ def sendmessage (socks, message):
 		if socks in socket_terbaca:
 			socket_terbaca.remove(socks)
 
-def loginusr (socks, name):
+def register (socks, name, paswd):
+	usr_test=0
+	for alluser in akun:
+		if alluser == name:
+			usr_test=1
+	if usr_test == 1:
+		sendmessage (socks, "Username telah dipakai\n")
+	else:
+		akun.append(name)
+		akun.append(paswd)
+		sendmessage (socks, "Anda berhasil terdaftar\n")	
+
+def loginusr (socks, name, paswd):
 	usr_test=0
 	log_test=0
+	valid_login=0
 	for alluser in user_list:
 		if alluser == name:
 			usr_test=1
 		if alluser == socks:
 			log_test=1
 	if log_test == 1:
-		sendmessage (socks, "Anda telah Login!!\n")
+		sendmessage (socks, "Anda telah login.\n")
 	elif usr_test == 1:
-		sendmessage (socks, "Username telah terpakai\n")
+		sendmessage (socks, "Anda telah login.\n")
 	else:
-		user_list.append(socks)
-		user_list.append(name)
-		sendmessage (socks, "Login sukses\n")
+		for a in range (len(akun)):
+			if akun[a] == name and akun[a+1] == paswd:				
+				valid_login=1
+		if valid_login==1:
+			user_list.append(socks)
+			user_list.append(name)
+			sendmessage (socks, "Login sukses\n")				
+		else:
+			sendmessage (socks, "Username atau Password anda Salah\n")
 
 def broadcastmessage (socks, message):
 	for a in range (len(user_list)):
@@ -47,6 +65,7 @@ def send_message (socks, message):
 
 socket_terbaca = [] #menyimpan daftar koneksi yang dapat dibaca
 user_list = []
+akun = []
 # Create a TCP/IP socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -72,10 +91,12 @@ while True:
 			try:
 				data = socks.recv(4096)
 				if data:
-					command = string.split(data[:-1])
+					command = data.split()
 					length = len(command)
-					if command[0]=="login":
-						loginusr(socks, str(command[1]))
+					if command[0]=="regist":
+						register(socks, str(command[1]), str(command[2]))					
+					elif command[0]=="login":
+						loginusr(socks, str(command[1]), str(command[2]))
 					elif command[0]=="list-user":
 						cek_login=0
 						
@@ -90,6 +111,7 @@ while True:
 								if a%2==1: #meminta nama username tersimpan di indeks ganjil array user_list
 									listuser += " "
 									listuser += str(user_list[a])
+									listuser += ","
 							sendmessage(socks, "\r" + "List User : " + listuser + "\n")
 					elif command[0]=="send-to":
 						cek_login=0
@@ -111,7 +133,7 @@ while True:
 										your_msg += str(command[a]) 
 							for a in range (len(user_list)):
 								if user_list[a]==command[1]:
-									sendmessage(user_list[a-1], "\r"+'['+user_now+'] ' + your_msg + "\n")
+									sendmessage(user_list[a-1], "\r"+"Pesan pribadi dari "+'['+user_now+'] ' + your_msg + "\n")
 					else:
 						cek_login=0
 						user_now=""
@@ -133,7 +155,6 @@ while True:
 							broadcastmessage(socks, "\r" + '['+user_now+'] ' + your_msg + "\n")
 						
 #send_message(socks, "\r"+'[' + str(socks.getpeername()) + '] ' + data)
-					
 				else:
 					if socks in socket_terbaca:
 						broadcastmessage(socks,"Teman anda telah offline\n")
