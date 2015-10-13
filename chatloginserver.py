@@ -38,15 +38,16 @@ def loginusr (socks, name, paswd):
 			if akun[a] == name and akun[a+1] == paswd:				
 				valid_login=1
 		if valid_login==1:
-			user_list.append(socks)
 			user_list.append(name)
-			sendmessage (socks, "Login sukses\n")				
+			user_list.append(socks)
+			sendmessage (socks, "Login sukses\n")
+			#broadcastmessage(connection, "\r"+"Seorang teman memasuki chat room\n")				
 		else:
 			sendmessage (socks, "Username atau Password anda Salah\n")
 
 def broadcastmessage (socks, message):
 	for a in range (len(user_list)):
-		if user_list[a] != sock and user_list[a] != socks and a%2==0:
+		if user_list[a] != sock and user_list[a] != socks and a%2==1:
 			try:
 				user_list[a].send(message)
 			except:
@@ -86,7 +87,7 @@ while True:
 			connection, client_address = sock.accept()
 			socket_terbaca.append(connection) #client socket dimasukkan ke daftar koneksi yang dapat dibaca
 			print "[%s: %s] terhubung ke server" % client_address
-			broadcastmessage(connection, "\r"+"Seorang teman memasuki chat room\n")
+			
 		else : #jika client socket yang readable, maka server akan membaca pesan, dan dikirim ke client yang lain
 			try:
 				data = socks.recv(4096)
@@ -98,48 +99,54 @@ while True:
 					elif command[0]=="login":
 						loginusr(socks, str(command[1]), str(command[2]))
 					elif command[0]=="list-user":
-						cek_login=0
+						if length > 1:
+							sendmessage(socks, "Perintah yang anda masukkan salah\n")	
+						else:	
+							cek_login=0
 						
-						for a in range (len(user_list)):
-							if user_list[a]==socks:
-								cek_login=1
-						if cek_login==0:
-							sendmessage(socks,"Anda harus login terlebih dahulu\n")
-						else:
-							listuser = ""
-							for a in range(len(user_list)):
-								if a%2==1: #meminta nama username tersimpan di indeks ganjil array user_list
-									listuser += " "
-									listuser += str(user_list[a])
-									listuser += ","
-							sendmessage(socks, "\r" + "List User : " + listuser + "\n")
-					elif command[0]=="send-to":
-						cek_login=0
-						user_now=""
-						for a in range (len(user_list)):
-							if user_list[a]==socks:
-								user_now=user_list[a+1] #mengambil nama user
-								cek_login=1
-						if cek_login==0:
-							sendmessage(socks,"Anda harus login terlebih dahulu\n")
-						else:
-							your_msg=""
-							for a in range (len(command)):
-								if a>1: #indeks array command yang lebih dari 1 merupakan isi pesan
-									if your_msg:
-										your_msg += " "
-										your_msg += str(command[a])
-									else:
-										your_msg += str(command[a]) 
 							for a in range (len(user_list)):
-								if user_list[a]==command[1]:
-									sendmessage(user_list[a-1], "\r"+"Pesan pribadi dari "+'['+user_now+'] ' + your_msg + "\n")
+								if user_list[a]==socks:
+									cek_login=1
+							if cek_login==0:
+								sendmessage(socks,"Anda harus login terlebih dahulu\n")
+							else:
+								listuser = ""
+								for a in range(len(user_list)):
+									if a%2==0: #meminta nama username tersimpan di indeks ganjil array user_list
+										listuser += " "
+										listuser += str(user_list[a])
+										listuser += ","
+								sendmessage(socks, "\r" + "List User : " + listuser + "\n")
+					elif command[0]=="send-to":
+						if length < 3:
+							sendmessage(socks, "Perintah yang anda ketikkan salah\n")
+						else:	
+							cek_login=0
+							user_now=""
+							for a in range (len(user_list)):
+								if user_list[a]==socks:
+									user_now=user_list[a-1] #mengambil nama user
+									cek_login=1
+							if cek_login==0:
+								sendmessage(socks,"Anda harus login terlebih dahulu\n")
+							else:
+								your_msg=""
+								for a in range (len(command)):
+									if a>1: #indeks array command yang lebih dari 1 merupakan isi pesan
+										if your_msg:
+											your_msg += " "
+											your_msg += str(command[a])
+										else:
+											your_msg += str(command[a]) 
+								for a in range (len(user_list)):
+									if user_list[a]==command[1]:
+										sendmessage(user_list[a+1], "\r"+"Pesan pribadi dari "+'['+user_now+'] ' + your_msg + "\n")
 					else:
 						cek_login=0
 						user_now=""
 						for a in range (len(user_list)):
 							if user_list[a]==socks:
-								user_now=user_list[a+1]
+								user_now=user_list[a-1]
 								cek_login=1
 						if cek_login==0:
 							sendmessage(socks, "Anda harus login terlebih dahulu\n")
