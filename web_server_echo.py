@@ -17,6 +17,7 @@ while True:
         data = connection.recv(2048)
 	print data
 	direktori = data.split()
+	print direktori
 	dir1=direktori[1]
 	if direktori[1][0]=='/' :
 		try :
